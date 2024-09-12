@@ -61,6 +61,7 @@ run_prediction_python_script <- function(script_path,
       "import sys; sys.argv = ['%s', '-w', '%s', '-p', '%s', '-r', '%s', '-m', '%s', '-n', '%s', '-t', '%f', '-f', '%s']; exec(open('%s').read())", # nolint: line_length_linter.
       script_path, script_dir, profile_main_dir, profile_sub_dir, model_path, name_prefix, threshold, file_format, script_path # nolint: line_length_linter.
     )
+
     # Run the Python script with arguments
     reticulate::py_run_string(command)
   } else {
@@ -179,12 +180,22 @@ process_all_files <- function(prediction_dir, partial_name) {
 #' )
 #' }
 #' @export
-run_PRIMEloci <- function(ctss_rse,
-                          tc_grl,
-                          config_file = "config_R_PRIMEloci.yaml") {
+run_PRIMEloci <- function(ctss_rse) {
 
-  # Load configuration from YAML file
-  config <- yaml::read_yaml(config_file)
+  # Default configuration
+  config <- list(
+  output_dir = getwd(),
+  profile_main_dir = "profiles",
+  python_script_dir = system.file("python", package = "PRIMEloci"),
+  model_path = system.file("models", "PRIMEloci_GM12878_wt10M.sav", package = "PRIMEloci"),
+  prefix_out_name = "modelPred",
+  profile_sub_dir = "tcs",
+  profile_file_type = "parquet",
+  threshold = 0.2,
+  save_count_profiles = FALSE,
+  ext_dis = 200,
+  partial_name = "pred_slt.*\\.bed"
+)
 
   # Set up directories and file paths based on config
   prediction_dir <- file.path(config$output_dir,
@@ -203,6 +214,10 @@ run_PRIMEloci <- function(ctss_rse,
                    output_main_name = outdir_main_name,
                    output_subdir_name = outdir_subdir_name)
 
+  # Call tag clusters
+  writeLines(paste0("\nExtracting TCs from", substitute(ctss_rse), ".."))
+  tc_grl <- get_tcs_and_extend_fromthick(ctss_rse, ext_dis=config$ext_dis)
+
   # Create profiles for the specified subdir_name
   writeLines(paste0("\nCreating profiles for ", outdir_subdir_name, ".."))
   wrapup_make_profiles(ctss_rse,
@@ -217,10 +232,8 @@ run_PRIMEloci <- function(ctss_rse,
   writeLines("\n### Finished profile creation ###\n")
 
   # Run Python script for profile prediction
-
-
   run_prediction_python_script(
-    script_path = "_predict_profile_probabilities.py",
+    script_path = system.file("python","_predict_profile_probabilities.py", package = "PRIMEloci"),
     script_dir = config$python_script_dir,
     profile_main_dir = file.path(config$output_dir, config$profile_main_dir),
     profile_sub_dir = config$profile_sub_dir,
