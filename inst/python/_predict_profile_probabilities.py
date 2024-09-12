@@ -20,7 +20,7 @@ from python.helpfn_for_prediction import move_metadata_columns_to_ranges
 def load_env_vars(script_dir, profile_main_dir, subdir_name, model_path):
 
     # Set the working directory
-    os.chdir(script_dir)
+    # os.chdir(script_dir)
 
     # Import model
     model = pickle.load(open(model_path, 'rb'))

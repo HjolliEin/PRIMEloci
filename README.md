@@ -110,22 +110,32 @@ To use PRIMEloci, follow these steps:
 
 ### Usage of R function in PRIMEloci package
 
-Ensure that all settings for `run_PRIMEloci()` are correctly configured in `path/to/PRIMEloci/genomewide_prediction/config_R_PRIMEloci.yaml`. 
+PRIMEloci requires [`reticulate`](https://rstudio.github.io/reticulate/) for running python script in background
 
-```R
-# load libraries
-library(PRIMEloci)
+1. **Setting up virtual environment using reticulate**
+   ```r
+   # Load reticulate
+   library(reticulate)
 
-# Load necessary R objects
-ctss_rse <- loadRDS("path/to/ctss_rse.rds")
-tc_grl <- loadRDS("path/to/tc_grl.rds")
+   # Create a new virtual environment (or activate an existing one)
+   virtualenv_create("PRIMEloci")
 
-# Run the PRIMEloci workflow (Steps 3-5)
-primeloci_tc_grl <- run_PRIMEloci(ctss_rse = ctss_rse,
-                                  tc_grl = tc_grl,
-                                  config_file = "config_R_PRIMEloci.yaml")
-```
+   # Install required packages
+   pkgs <- system.file("python", "env_requirements.txt", package = "PRIMEloci")
+   virtualenv_install("PRIMEloci", packages = paste("-r", pkgs))
+   ```
 
+2. **Example usage for predicting regulatory eements using PRIMEloci**
+   ```r
+   #Load requirements
+   library(reticulate)
+   use_virtualenv("PRIMEloci", required = TRUE)
+   library(PRIMEloci)
+   library(CAGEfightR)
+   
+   #Run PRIMEloci on CTSSs
+   exampleRE <- run_PRIMEloci(exampleCTSSs)
+   ```
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue to discuss any changes or improvements.

@@ -182,9 +182,11 @@ process_all_files <- function(prediction_dir, partial_name) {
 #' @export
 run_PRIMEloci <- function(ctss_rse) {
 
+  tmp_dir <- tempdir()
+
   # Default configuration
   config <- list(
-  output_dir = getwd(),
+  output_dir = tmp_dir,
   profile_main_dir = "profiles",
   python_script_dir = system.file("python", package = "PRIMEloci"),
   model_path = system.file("models", "PRIMEloci_GM12878_wt10M.sav", package = "PRIMEloci"),
@@ -215,8 +217,8 @@ run_PRIMEloci <- function(ctss_rse) {
                    output_subdir_name = outdir_subdir_name)
 
   # Call tag clusters
-  writeLines(paste0("\nExtracting TCs from", substitute(ctss_rse), ".."))
-  tc_grl <- get_tcs_and_extend_fromthick(ctss_rse, ext_dis=config$ext_dis)
+  writeLines(paste0("\nExtracting TCs from ", substitute(ctss_rse), ".."))
+  tc_grl <- suppressWarnings(get_tcs_and_extend_fromthick(ctss_rse, ext_dis=config$ext_dis))
 
   # Create profiles for the specified subdir_name
   writeLines(paste0("\nCreating profiles for ", outdir_subdir_name, ".."))
@@ -245,6 +247,9 @@ run_PRIMEloci <- function(ctss_rse) {
 
   # Call the main function with the parsed argument
   gr_list <- process_all_files(prediction_dir, config$partial_name)
+
+  #Remove temporary files
+  unlink(tmp_dir,recursive=TRUE)
 
   writeLines("Done!")
 
