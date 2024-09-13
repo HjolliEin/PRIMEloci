@@ -127,13 +127,13 @@ PRIMEloci requires [`reticulate`](https://rstudio.github.io/reticulate/) for run
 
 2. **Example usage for predicting regulatory eements using PRIMEloci**
    ```r
-   #Load requirements
+   # Load requirements
    library(reticulate)
    use_virtualenv("PRIMEloci", required = TRUE)
    library(PRIMEloci)
    library(CAGEfightR)
    
-   #Run PRIMEloci on CTSSs
+   # Run PRIMEloci on CTSSs
    exampleRE <- run_PRIMEloci(exampleCTSSs)
    ```
 ## Contributing
